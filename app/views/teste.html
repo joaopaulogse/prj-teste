@@ -1,0 +1,32 @@
+{% extends "layout/baseForm.html" %}
+
+{% block conteudo %}
+
+
+
+        <input id="file" type="file" multiple name="file">
+        <button onclick="upload()" class="btn-flat" id="botao">ok</button>
+{% endblock conteudo %}
+{% block javascript %}
+    <script>
+        function upload(){
+
+            let file = $("#file").get(0).files[0]
+            var form = new FormData();
+            form.append("file", file);
+            $.ajax({
+                type:"POST",
+                url:'/upload',
+                data: form,
+                success(data){
+                    console.log(data);
+                    Materialize.toast(data, 3000);
+                }, 
+                crossDomain:true,
+                processData: false,
+                contentType: false
+            })
+          
+        }
+    </script>
+{% endblock javascript %}

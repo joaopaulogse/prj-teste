@@ -1,0 +1,160 @@
+{% extends "layout/baseForm.html" %}
+
+{% block javascript %}
+    <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.15/datatables.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $('#table').dataTable( {
+                    bSort: true,
+                    aoColumns: [ { sWidth: "45%" }, { sWidth: "45%" }, { sWidth: "10%", bSearchable: false, bSortable: false } ],
+                "scrollY":        "200px",
+                "scrollCollapse": true,
+                "info":           true,
+                "paging":         true
+            } )
+            $(".button-collapse").sideNav();
+            $('.modal.bottom-sheet').modal();
+        });
+        function cadastro(){
+            var  nome = $(".nome"),
+                email=$(".email"),
+                senha=$(".senha");
+
+            let usuario = {
+                nome:nome.val(),
+                email:email.val(),
+                senha:senha.val()
+            }
+            $.ajax({
+                method:"POST",
+                url:'/usuario',
+                data:{
+                    "usuario":usuario
+                },
+                success:function(data){
+                    if(data.sucesso){
+                        Materialize.toast(`
+                            <i class="material-icons">done</i>
+                            <span class="green-text">${data.sucesso}</span>
+                        `, 2000);
+                    }else{
+                        Materialize.toast(`
+                            <i class="material-icons">warning</i>
+                            <span class="red-text">${data.erro}</span>
+                        `, 2000);
+                    }
+                    $("input").each((i,e)=>{
+                        e.value = "";
+                    })
+                },
+                error:function(err){
+                    console.log(JSON.stringify(err));
+                    Materialize.toast(JSON.stringify(err.responseText), 2000);
+                }
+            })
+        }
+        function pegaUsuarios(){
+           
+            $.ajax({
+                method:"GET",
+                url:'/usuarios',
+                success:function(data){
+                    console.log(JSON.stringify(data));
+                    $("#table").html(`
+                            <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Email</th>
+                            </tr>
+                            </thead>
+
+                            <tbody>
+                                ${data.map(dados=>{
+                                    return `
+                                    <tr>
+                                        <td>${dados.nome}</td>
+                                        <td>${dados.email}</td>
+                                    </tr>
+                                    
+                                    `
+                                }).join('')}
+                            
+                            </tbody>
+                    `)
+                },
+                error:function(err){
+                    console.log(JSON.stringify(err));
+                    Materialize.toast(JSON.stringify(err.responseText), 2000);
+                }
+            })
+        }
+        
+        
+    </script>
+{% endblock javascript %}
+
+{% block conteudo %}
+<div class="row">
+        <div class="col s3">
+            <ul id="slide-out" class="side-nav">
+                <li><div class="userView">
+                <div class="background blue-grey lighten-2">
+                    <!--img src="images/office.jpg"-->
+                </div>
+                <a href="#!user" class="blue-grey darken-1">Foto</a>
+                <a href="#!name"><span class="white-text name">John Doe</span></a>
+                <a href="#!email"><span class="white-text email">jdandturk@gmail.com</span></a>
+                </div></li>
+                <li><a href="#!"><i class="material-icons">cloud</i>First Link With Icon</a></li>
+                <li><a href="#!">Second Link</a></li>
+                <li><div class="divider"></div></li>
+                <li><a class="subheader">Subheader</a></li>
+                <li><a class="waves-effect" href="#!">Third Link With Waves</a></li>
+            </ul>
+            <a href="#" data-activates="slide-out" class="button-collapse"><i class="material-icons">menu</i></a>
+        </div>
+    <div class="col s3">
+      <div class="row">
+        <div class="input-field">
+          <i class="material-icons prefix">account_circle</i>
+          <input id="icon_prefix" type="text" class="validate nome">
+          <label for="icon_prefix">Nome</label>
+        </div>
+        <div class="input-field">
+          <i class="material-icons prefix">email</i>
+          <input id="icon_telephone" type="email" class="validate email">
+          <label for="icon_telephone">Email</label>
+        </div>
+        <div class="input-field">
+          <i class="material-icons prefix">vpn_key</i>
+          <input id="icon_telephone" type="password" class="validate senha">
+          <label for="icon_telephone">Senha</label>
+        </div>
+        <button onclick="cadastro()" class="btn col s6">Cadastrar</button>
+        <a class="btn col s6 blue" onclick="pegaUsuarios()" >Usuarios</a>
+        
+      </div>
+    </div>
+      <div id="usuarios" class="col s3">
+        <table id="table">
+            
+        </table>
+      </div>
+    <!-- Modal Trigger -->
+    <a class="waves-effect waves-light btn col s1" href="#modal1">Upload</a>
+
+  </div>
+  <!-- Modal Structure -->
+  <div id="modal1" class="modal bottom-sheet">
+    <div class="modal-content">
+      <h4>Modal Header</h4>
+      <form id="formulario_file">
+        <input id="file" type="file">
+        <button class="btn-flat">Enviar</button>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <a class="modal-action modal-close waves-effect waves-green btn-flat" onclick="upload()">Agree</a>
+    </div>
+  </div>
+{% endblock conteudo %}
